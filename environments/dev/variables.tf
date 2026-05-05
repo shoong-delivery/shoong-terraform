@@ -141,6 +141,11 @@ variable "domain" {
   type        = string
 }
 
+variable "zone_domain" {
+  description = "Route53 호스팅 존 루트 도메인"
+  type        = string
+}
+
 variable "price_class" {
   description = "CloudFront Price Class"
   type        = string

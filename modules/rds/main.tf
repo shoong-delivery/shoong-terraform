@@ -51,7 +51,7 @@ resource "aws_db_instance" "primary" {
 resource "aws_db_instance" "replica" {
   count = var.replica_count
 
-  identifier          = "${var.project}-${var.env}-db-replica"
+  identifier          = "${var.project}-${var.env}-db-replica-${count.index + 1}"
   replicate_source_db = aws_db_instance.primary.identifier
   instance_class      = var.db_instance_class
   publicly_accessible = false

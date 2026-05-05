@@ -121,13 +121,13 @@ variable "skip_final_snapshot" {
   type        = bool
 }
 
-variable "dev_image_count" {
-  description = "ECR dev 이미지 보관 개수"
-  type        = number
-}
-
 variable "domain" {
   description = "도메인 이름"
+  type        = string
+}
+
+variable "zone_domain" {
+  description = "Route53 호스팅 존 루트 도메인"
   type        = string
 }
 

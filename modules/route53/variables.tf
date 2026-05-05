@@ -11,6 +11,11 @@ variable "env" {
 }
 
 variable "domain" {
-  description = "Route53 호스팅 존 도메인"
+  description = "서비스 도메인(레코드 생성에 사용)"
+  type        = string
+}
+
+variable "zone_domain" {
+  description = "Route53 호스팅 존 조회용 루트 도메인"
   type        = string
 }

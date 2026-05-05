@@ -22,7 +22,6 @@ resource "aws_route53_record" "validation" {
       type   = dvo.resource_record_type
       record = dvo.resource_record_value
     }
-    #  if dvo.domain_name == "shoong.cloud" # 중복 제거
   }
 
   zone_id = var.zone_id

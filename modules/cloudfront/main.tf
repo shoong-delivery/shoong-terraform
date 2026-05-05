@@ -36,7 +36,7 @@ resource "aws_cloudfront_distribution" "this" {
   http_version        = "http2and3"
   price_class         = var.price_class
   web_acl_id          = var.web_acl_arn
-  aliases             = ["www.${var.domain}"]
+  aliases             = ["www.${var.domain}", var.domain]
   default_root_object = "index.html"
 
   # S3 오리진(frontend)
@@ -117,10 +117,23 @@ resource "aws_cloudfront_distribution" "this" {
   }
 }
 
-# Route53 A 레코드(www.shoong.cloud -> CloudFront)
+# Route53 A 레코드(www.domain -> CloudFront)
 resource "aws_route53_record" "www" {
   zone_id = var.zone_id
   name    = "www.${var.domain}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.this.domain_name
+    zone_id                = aws_cloudfront_distribution.this.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Route53 A 레코드(apex domain -> CloudFront)
+resource "aws_route53_record" "apex" {
+  zone_id = var.zone_id
+  name    = var.domain
   type    = "A"
 
   alias {

@@ -78,13 +78,18 @@ module "ecr" {
 module "route53" {
   source = "../../modules/route53"
 
-  project = var.project
-  env     = var.env
-  domain  = var.domain
+  project     = var.project
+  env         = var.env
+  domain      = var.domain
+  zone_domain = var.zone_domain
 }
 
 module "acm" {
   source = "../../modules/acm"
+
+  providers = {
+    aws = aws.us_east_1
+  }
 
   project = var.project
   env     = var.env
@@ -94,6 +99,10 @@ module "acm" {
 
 module "waf" {
   source = "../../modules/waf"
+
+  providers = {
+    aws = aws.us_east_1
+  }
 
   project = var.project
   env     = var.env

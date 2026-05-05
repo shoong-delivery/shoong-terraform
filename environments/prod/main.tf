@@ -38,6 +38,7 @@ module "eks" {
 }
 
 data "aws_secretsmanager_secret_version" "db" {
+  # TODO: 7일 삭제 유예기간 후 "/shoong/prod/db-credentials" 로 변경
   secret_id = "/shoong/pro/db-credentials"
 }
 
@@ -64,24 +65,22 @@ module "rds" {
   skip_final_snapshot     = var.skip_final_snapshot
 }
 
-module "ecr" {
-  source = "../../modules/ecr"
-
-  project         = var.project
-  env             = var.env
-  dev_image_count = var.dev_image_count
-}
 
 module "route53" {
   source = "../../modules/route53"
 
-  project = var.project
-  env     = var.env
-  domain  = var.domain
+  project     = var.project
+  env         = var.env
+  domain      = var.domain
+  zone_domain = var.zone_domain
 }
 
 module "acm" {
   source = "../../modules/acm"
+
+  providers = {
+    aws = aws.us_east_1
+  }
 
   project = var.project
   env     = var.env
@@ -91,6 +90,10 @@ module "acm" {
 
 module "waf" {
   source = "../../modules/waf"
+
+  providers = {
+    aws = aws.us_east_1
+  }
 
   project = var.project
   env     = var.env
