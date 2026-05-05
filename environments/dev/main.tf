@@ -14,27 +14,27 @@ module "vpc" {
 module "security_group" {
   source = "../../modules/security_group"
 
-  project              = var.project
-  env                  = var.env
-  vpc_id               = module.vpc.vpc_id
-  vpc_cidr             = var.vpc_cidr
-  allow_ssm_db_access  = true
+  project             = var.project
+  env                 = var.env
+  vpc_id              = module.vpc.vpc_id
+  vpc_cidr            = var.vpc_cidr
+  allow_ssm_db_access = true
 }
 
 module "eks" {
   source = "../../modules/eks"
 
-  project            = var.project
-  env                = var.env
-  cluster_name       = var.cluster_name
-  cluster_version    = var.cluster_version
-  private_subnet_ids = module.vpc.private_subnet_ids
-  eks_node_sg_id     = module.security_group.eks_node_sg_id
-  node_instance_type = var.node_instance_type
-  node_ami_type      = var.node_ami_type
-  node_desired_size  = var.node_desired_size
-  node_min_size      = var.node_min_size
-  node_max_size      = var.node_max_size
+  project                = var.project
+  env                    = var.env
+  cluster_name           = var.cluster_name
+  cluster_version        = var.cluster_version
+  private_subnet_ids     = module.vpc.private_subnet_ids
+  eks_node_sg_id         = module.security_group.eks_node_sg_id
+  node_instance_type     = var.node_instance_type
+  node_ami_type          = var.node_ami_type
+  node_desired_size      = var.node_desired_size
+  node_min_size          = var.node_min_size
+  node_max_size          = var.node_max_size
   ssm_ec2_role_arn       = aws_iam_role.ssm_ec2.arn
   ssm_ec2_sg_id          = module.security_group.ssm_ec2_sg_id
   endpoint_public_access = true
@@ -154,4 +154,19 @@ module "vpc_endpoint" {
   private_subnet_ids      = module.vpc.private_subnet_ids
   private_route_table_ids = module.vpc.private_route_table_ids
   vpc_endpoint_sg_id      = module.security_group.vpc_endpoint_sg_id
+}
+
+module "iam_oidc" {
+  source = "../../modules/iam_oidc"
+
+  project    = var.project
+  env        = var.env
+  github_org = "shoong-delivery"
+  github_repos = [
+    "shoong-order-api",
+    "shoong-kitchen-api",
+    "shoong-delivery-api",
+    "shoong-notification-api",
+    "shoong-batch"
+  ]
 }
