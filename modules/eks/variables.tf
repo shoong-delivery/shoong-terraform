@@ -57,3 +57,14 @@ variable "ssm_ec2_role_arn" {
   description = "SSM EC2 IAM Role ARN (EKS 접근용)"
   type        = string
 }
+
+variable "ssm_ec2_sg_id" {
+  description = "SSM EC2 Security Group ID (EKS API 서버 443 접근 허용용)"
+  type        = string
+}
+
+variable "endpoint_public_access" {
+  description = "EKS API 서버 퍼블릭 엔드포인트 활성화 여부"
+  type        = bool
+  default     = false
+}

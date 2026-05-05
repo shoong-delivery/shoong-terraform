@@ -72,7 +72,7 @@ resource "aws_eks_cluster" "this" {
     subnet_ids              = var.private_subnet_ids
     security_group_ids      = [var.eks_node_sg_id]
     endpoint_private_access = true
-    endpoint_public_access  = false
+    endpoint_public_access  = var.endpoint_public_access
   }
 
   access_config {
@@ -138,4 +138,14 @@ resource "aws_eks_access_policy_association" "ssm_ec2" {
   access_scope {
     type = "cluster"
   }
+}
+
+resource "aws_security_group_rule" "cluster_from_ssm" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+  source_security_group_id = var.ssm_ec2_sg_id
+  description              = "Access the EKS API server from the SSM EC2 instance"
 }

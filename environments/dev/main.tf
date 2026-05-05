@@ -34,8 +34,9 @@ module "eks" {
   node_desired_size  = var.node_desired_size
   node_min_size      = var.node_min_size
   node_max_size      = var.node_max_size
-  ssm_ec2_role_arn   = aws_iam_role.ssm_ec2.arn
-
+  ssm_ec2_role_arn       = aws_iam_role.ssm_ec2.arn
+  ssm_ec2_sg_id          = module.security_group.ssm_ec2_sg_id
+  endpoint_public_access = true
 }
 
 data "aws_secretsmanager_secret_version" "db" {
