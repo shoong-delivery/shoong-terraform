@@ -17,3 +17,9 @@ variable "vpc_cidr" {
   description = "VPC CIDR 블록 (VPC Endpoint SG inbound용)"
   type        = string
 }
+
+variable "allow_ssm_db_access" {
+  description = "SSM EC2에서 RDS 직접 접근 허용 여부 (dev only)"
+  type        = bool
+  default     = false
+}

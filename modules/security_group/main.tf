@@ -107,14 +107,6 @@ resource "aws_security_group" "rds" {
     security_groups = [aws_security_group.eks_node.id]
   }
 
-  ingress {
-    description     = "PostgreSQL from SSM EC2"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ssm_ec2.id]
-  }
-
   egress {
     description = "Allow all outbound"
     from_port   = 0
@@ -156,6 +148,18 @@ resource "aws_security_group" "vpc_endpoint" {
     Project = var.project
     Env     = var.env
   }
+}
+
+resource "aws_security_group_rule" "rds_from_ssm" {
+  count = var.allow_ssm_db_access ? 1 : 0
+
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.rds.id
+  source_security_group_id = aws_security_group.ssm_ec2.id
+  description              = "Direct access to RDS from the SSM EC2 instance (dev only)"
 }
 
 # EKS Node SG에 SSM EC2에서 오는 443 허용 추가
