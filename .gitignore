@@ -7,5 +7,5 @@
 # 예외: 샘플 파일은 커밋해도 됨
 !terraform.tfvars.example
 
-environments/dev/terraform.tfvars
+# environments/dev/terraform.tfvars
 environments/prod/terraform.tfvars
