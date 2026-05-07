@@ -14,9 +14,9 @@ cluster_name       = "shoong-dev-cluster"
 cluster_version    = "1.35"
 node_instance_type = "t3.small"
 node_ami_type      = "AL2023_x86_64_STANDARD"
-node_desired_size  = 2
-node_min_size      = 1
-node_max_size      = 3
+node_desired_size  = 4
+node_min_size      = 3
+node_max_size      = 6
 
 # db
 db_engine_version       = "18.3"
