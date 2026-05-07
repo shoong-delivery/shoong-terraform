@@ -58,6 +58,11 @@ resource "aws_iam_role_policy" "eso" {
         Resource = "arn:aws:ssm:${var.aws_region}:*:parameter/shoong/dev/*"
       },
       {
+        Effect   = "Allow"
+        Action   = ["ssm:DescribeParameters"]
+        Resource = "*"
+      },
+      {
         Effect = "Allow"
         Action = [
           "secretsmanager:GetSecretValue",
