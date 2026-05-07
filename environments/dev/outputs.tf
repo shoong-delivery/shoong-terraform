@@ -17,3 +17,7 @@ output "cloudfront_domain" {
 output "github_actions_role_arn" {
   value = module.iam_oidc.github_actions_role_arn
 }
+
+output "eso_role_arn" {
+  value = aws_iam_role.eso.arn
+}
