@@ -149,3 +149,13 @@ resource "aws_security_group_rule" "cluster_from_ssm" {
   source_security_group_id = var.ssm_ec2_sg_id
   description              = "Access the EKS API server from the SSM EC2 instance"
 }
+
+resource "aws_security_group_rule" "alb_to_eks_cluster" {
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 65535
+  protocol                 = "tcp"
+  security_group_id        = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+  source_security_group_id = var.alb_sg_id
+  description              = "ALB to EKS cluster for TGB ip mode"
+}

@@ -68,3 +68,8 @@ variable "endpoint_public_access" {
   type        = bool
   default     = false
 }
+
+variable "alb_sg_id" {
+  description = "ALB Security Group ID"
+  type        = string
+}
