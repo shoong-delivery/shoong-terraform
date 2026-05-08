@@ -21,3 +21,19 @@ output "github_actions_role_arn" {
 output "eso_role_arn" {
   value = aws_iam_role.eso.arn
 }
+
+output "db_endpoint" {
+  value = module.rds.db_endpoint
+}
+
+output "vpc_id" {
+  value = module.vpc.vpc_id
+}
+
+output "target_group_arn" {
+  value = module.alb.target_group_arn
+}
+
+output "aws_lb_controller_role_arn" {
+  value = aws_iam_role.aws_lb_controller.arn
+}

@@ -42,3 +42,26 @@ resource "aws_ssm_parameter" "service" {
   }
 }
 
+resource "aws_ssm_parameter" "alb_target_group_arn" {
+  name  = "/shoong/${var.env}/alb-target-group-arn"
+  type  = "String"
+  value = module.alb.target_group_arn
+
+  tags = {
+    Project = var.project
+    Env     = var.env
+  }
+}
+
+resource "aws_ssm_parameter" "vpc_id" {
+  name  = "/shoong/${var.env}/vpc-id"
+  type  = "String"
+  value = module.vpc.vpc_id
+
+  tags = {
+    Project = var.project
+    Env     = var.env
+  }
+}
+
+

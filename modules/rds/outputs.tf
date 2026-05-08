@@ -3,6 +3,7 @@ output "db_endpoint" {
   value       = aws_db_instance.primary.endpoint
 }
 
+
 output "db_name" {
   description = "데이터베이스 이름"
   value       = aws_db_instance.primary.db_name
