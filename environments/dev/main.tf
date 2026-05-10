@@ -38,6 +38,7 @@ module "eks" {
   ssm_ec2_role_arn       = aws_iam_role.ssm_ec2.arn
   ssm_ec2_sg_id          = module.security_group.ssm_ec2_sg_id
   endpoint_public_access = true
+  alb_sg_id              = module.security_group.alb_sg_id
 }
 
 data "aws_secretsmanager_secret_version" "db" {
