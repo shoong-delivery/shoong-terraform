@@ -43,10 +43,16 @@ resource "aws_iam_role_policy" "github_actions_ecr" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      # GetAuthorizationToken은 리소스 단위 제한이 불가능 (AWS 정책 제약)
+      {
+        Effect   = "Allow"
+        Action   = ["ecr:GetAuthorizationToken"]
+        Resource = "*"
+      },
+      # 그 외 push/pull 권한은 지정된 ECR 리포지토리로만 제한
       {
         Effect = "Allow"
         Action = [
-          "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
@@ -55,7 +61,9 @@ resource "aws_iam_role_policy" "github_actions_ecr" {
           "ecr:CompleteLayerUpload",
           "ecr:PutImage"
         ]
-        Resource = "*"
+        Resource = [
+          for repo in var.ecr_repository_names : "arn:aws:ecr:*:*:repository/${repo}"
+        ]
       }
     ]
   })
