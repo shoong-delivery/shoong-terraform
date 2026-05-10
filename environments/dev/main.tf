@@ -70,6 +70,19 @@ module "rds" {
   skip_final_snapshot     = var.skip_final_snapshot
 }
 
+# EKS 워커 노드는 EKS가 자동 생성한 cluster primary SG를 사용함.
+# (modules/security_group의 eks_node SG는 컨트롤플레인 추가 SG일 뿐 노드에 안 붙음)
+# → RDS SG에 cluster primary SG로부터의 5432 인바운드를 명시적으로 허용해야 EKS Pod가 RDS 접근 가능.
+resource "aws_security_group_rule" "rds_from_eks_cluster_sg" {
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = module.security_group.rds_sg_id
+  source_security_group_id = module.eks.cluster_primary_security_group_id
+  description              = "PostgreSQL from EKS cluster primary SG (worker nodes)"
+}
+
 module "ecr" {
   source = "../../modules/ecr"
 

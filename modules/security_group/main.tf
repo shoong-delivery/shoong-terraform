@@ -86,6 +86,14 @@ resource "aws_security_group" "ssm_ec2" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  egress {
+    description     = "PostgreSQL outbound to RDS"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.rds.id]
+  }
+
   tags = {
     Name    = "${var.project}-${var.env}-ssm-ec2-sg"
     Project = var.project
@@ -94,18 +102,12 @@ resource "aws_security_group" "ssm_ec2" {
 }
 
 # RDS SG
+# inbound 룰은 모두 별도 aws_security_group_rule 리소스로 분리 관리
+# (inline ingress와 separate rule을 섞으면 drift 무한 루프 발생하기 때문)
 resource "aws_security_group" "rds" {
   name        = "${var.project}-${var.env}-rds-sg"
   description = "RDS Security Group"
   vpc_id      = var.vpc_id
-
-  ingress {
-    description     = "PostgreSQL from EKS Node"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_node.id]
-  }
 
   egress {
     description = "Allow all outbound"
@@ -120,6 +122,17 @@ resource "aws_security_group" "rds" {
     Project = var.project
     Env     = var.env
   }
+}
+
+# RDS ← EKS Node SG (이 SG는 실제 워커 노드에 안 붙지만, 컨트롤 플레인 SG로 EKS에 전달돼 있어 일단 유지)
+resource "aws_security_group_rule" "rds_from_eks_node" {
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.rds.id
+  source_security_group_id = aws_security_group.eks_node.id
+  description              = "PostgreSQL from EKS Node SG"
 }
 
 # VPC Endpoint SG

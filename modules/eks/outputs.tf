@@ -22,3 +22,8 @@ output "node_group_role_arn" {
   description = "노드 그룹 IAM Role ARN"
   value       = aws_iam_role.node_group.arn
 }
+
+output "cluster_primary_security_group_id" {
+  description = "EKS가 자동 생성한 클러스터 Primary SG (워커 노드에 자동으로 붙음)"
+  value       = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+}
