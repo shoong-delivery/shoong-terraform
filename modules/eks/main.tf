@@ -150,12 +150,24 @@ resource "aws_security_group_rule" "cluster_from_ssm" {
   description              = "Access the EKS API server from the SSM EC2 instance"
 }
 
-resource "aws_security_group_rule" "alb_to_eks_cluster" {
+# ALB -> Istio Ingress Gateway (HTTP 트래픽)
+resource "aws_security_group_rule" "alb_to_istio_http" {
   type                     = "ingress"
-  from_port                = 0
-  to_port                  = 65535
+  from_port                = 80
+  to_port                  = 80
   protocol                 = "tcp"
   security_group_id        = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
   source_security_group_id = var.alb_sg_id
-  description              = "ALB to EKS cluster for TGB ip mode"
+  description              = "ALB to Istio Ingress Gateway HTTP"
+}
+
+# ALB -> Istio Ingress Gateway (헬스체크)
+resource "aws_security_group_rule" "alb_to_istio_healthcheck" {
+  type                     = "ingress"
+  from_port                = 15021
+  to_port                  = 15021
+  protocol                 = "tcp"
+  security_group_id        = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+  source_security_group_id = var.alb_sg_id
+  description              = "ALB health check to Istio Ingress Gateway readiness"
 }
