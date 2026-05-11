@@ -6,6 +6,7 @@ resource "aws_s3_bucket" "frontend" {
     Project = var.project
     Env     = var.env
   }
+
 }
 
 resource "aws_s3_bucket_public_access_block" "frontend" {

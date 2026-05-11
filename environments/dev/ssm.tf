@@ -24,13 +24,6 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# EKS 접근을 위한 정책 추가
-# resource "aws_iam_role_policy_attachment" "ssm_eks" {
-#   role       = aws_iam_role.ssm_ec2.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-# }
-
-# 기존 AmazonEKSClusterPolicy 삭제하고 아래로 교체
 resource "aws_iam_role_policy" "ssm_eks_access" {
   name = "${var.project}-${var.env}-ssm-eks-access"
   role = aws_iam_role.ssm_ec2.id

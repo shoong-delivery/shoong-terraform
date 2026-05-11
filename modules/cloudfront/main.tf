@@ -115,6 +115,7 @@ resource "aws_cloudfront_distribution" "this" {
     Project = var.project
     Env     = var.env
   }
+
 }
 
 # Route53 A 레코드(www.domain -> CloudFront)

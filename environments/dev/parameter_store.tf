@@ -1,6 +1,6 @@
 locals {
   common_parameters = {
-    "/shoong/dev/NODE_ENV"             = "production"
+    "/shoong/dev/NODE_ENV"             = "development"
     "/shoong/dev/ORDER_API_URL"        = "http://dev-shoong-order:3001"
     "/shoong/dev/KITCHEN_API_URL"      = "http://dev-shoong-kitchen:3002"
     "/shoong/dev/DELIVERY_API_URL"     = "http://dev-shoong-delivery:3003"
