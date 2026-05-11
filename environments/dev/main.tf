@@ -107,10 +107,19 @@ module "acm" {
     aws = aws.us_east_1
   }
 
-  project = var.project
-  env     = var.env
-  domain  = var.domain
+  project    = var.project
+  env        = var.env
+  domain     = var.domain
+  zone_id    = module.route53.zone_id
+  extra_sans = ["internal.${var.domain}", "*.internal.${var.domain}"]
+}
+
+resource "aws_route53_record" "internal_wildcard" {
   zone_id = module.route53.zone_id
+  name    = "*.internal.${var.domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = [module.alb.alb_dns_name]
 }
 
 module "waf" {
