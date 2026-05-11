@@ -181,6 +181,7 @@ module "iam_oidc" {
     "shoong-kitchen-api",
     "shoong-delivery-api",
     "shoong-notification-api",
-    "shoong-batch"
+    "shoong-batch",
+    "shoong-frontend"
   ]
 }
