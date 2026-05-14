@@ -41,8 +41,7 @@ module "eks" {
 }
 
 data "aws_secretsmanager_secret_version" "db" {
-  # TODO: 7일 삭제 유예기간 후 "/shoong/prod/db-credentials" 로 변경
-  secret_id = "/shoong/pro/db-credentials"
+  secret_id = "/shoong/prod/db-credentials"
 }
 
 locals {
