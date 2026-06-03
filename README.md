@@ -78,12 +78,15 @@ shoong-terraform/
 │   │   ├── pipeline.tf     # ECR / GitHub OIDC / SSM Parameter
 │   │   └── Makefile        # 비용 절감용 선택적 destroy
 │   └── prod/           # 운영 환경 정의 (구성 템플릿)
-└── modules/            # 재사용 모듈
-    ├── vpc/  security_group/  vpc_endpoint/
-    ├── eks/  iam_oidc/
-    ├── rds/
-    ├── acm/  route53/  alb/  cloudfront/  waf/  s3/
-    └── ecr/
+├── modules/            # 재사용 모듈
+│   ├── vpc/  security_group/  vpc_endpoint/
+│   ├── eks/  iam_oidc/
+│   ├── rds/
+│   ├── acm/  route53/  alb/  cloudfront/  waf/  s3/
+│   └── ecr/
+└── scripts/            # apply 이후 클러스터 부트스트랩
+    ├── init.sh             # ArgoCD/Istio/ESO 설치 → 앱 배포 → DB 초기화
+    └── env.sh.example      # 설정 템플릿 (env.sh로 복사해 사용)
 ```
 
 ## 주요 설계 포인트
@@ -136,12 +139,67 @@ terraform plan
 terraform apply
 ```
 
-### 3. 비용 절감용 정리 / 완전 삭제
+### 3. 클러스터 부트스트랩
+
+`terraform apply` 로 인프라가 올라오면, EKS는 아직 빈 클러스터입니다.
+[scripts/init.sh](scripts/init.sh) 가 Terraform output을 읽어 그 뒤 단계를 자동화합니다.
 
 ```bash
+cd scripts
+cp env.sh.example env.sh   # ROOT / GITHUB_PAT / DB 자격증명 입력
+./init.sh
+```
+
+### 4. 비용 절감용 정리 / 완전 삭제
+
+```bash
+cd environments/dev
 make destroy        # 과금 리소스만 삭제 (S3/CF/ECR/DNS 보존)
 make destroy-all    # 전체 삭제 (주의: S3 파일·ECR 이미지 포함)
 ```
+
+## 클러스터 부트스트랩 스크립트
+
+[scripts/init.sh](scripts/init.sh) 는 `terraform apply` 와 "실제로 트래픽을 받는 클러스터" 사이의 간극을 메우는 스크립트입니다.
+Terraform이 만든 인프라(EKS·ALB·RDS·SSM)를 입력으로 받아, GitOps 레포 갱신부터 ArgoCD·Istio·ESO 설치, 앱 배포, DB 초기화까지 순서대로 진행합니다.
+
+### 동작 단계
+
+| 단계 | 내용 |
+| --- | --- |
+| 1 | Terraform output 조회 (VPC·ALB·TargetGroup·RDS·각종 Role ARN) |
+| 2~3 | output 값을 [shoong-gitops](https://github.com/shoong-delivery/shoong-gitops) 의 values에 반영 후 커밋·push |
+| 4 | EKS kubeconfig 설정 |
+| 5~7 | ArgoCD 설치 → 레포 자격증명 등록 → App of Apps 부트스트랩 |
+| 8 | Istio 네임스페이스/Ingress Gateway 동기화 대기 |
+| 9 | External Secrets Operator(Helm) 설치 (+ LB Controller 웹훅 인증서 복구 가드) |
+| 10 | ESO 리소스 Sync → `shoong-config`·`shoong-db-secret` 생성 확인 후 앱 재시작 |
+| 11 | k6(부하 테스트) 설치 확인 |
+| 12 | DB 자격증명을 AWS Secrets Manager에 등록 |
+| 13~15 | Bastion(SSM)에서 RDS 접속 테스트 → 테이블 생성·시드 SQL 실행 |
+| 16 | 전체 헬스체크 (ArgoCD·Istio·ESO 상태, 서비스 내부/ALB 경유 호출, 이미지 태그) |
+
+### 설정 (env.sh)
+
+비밀값은 `env.sh` 에 모아두고 스크립트가 시작 시 자동으로 `source` 합니다.
+`env.sh` 는 `.gitignore` 처리되어 커밋되지 않으며, 공개용 템플릿 [scripts/env.sh.example](scripts/env.sh.example) 을 복사해 채웁니다.
+
+| 변수 | 설명 |
+| --- | --- |
+| `ROOT` | 레포들이 모여 있는 기준 디렉토리 (미설정 시 자동 추정) |
+| `GITHUB_PAT` | GitOps 레포 접근용 토큰 |
+| `DB_USERNAME` / `DB_PASSWORD` | RDS 자격증명 (Secrets Manager에 등록됨) |
+
+### 단계별 재실행
+
+각 단계는 `STEP` 환경변수로 건너뛸 수 있습니다.
+중간에 실패했거나 특정 단계만 다시 돌리고 싶을 때 사용합니다.
+
+```bash
+STEP=9 ./init.sh    # 9단계(ESO 설치)부터 실행
+```
+
+> 멱등성을 고려해 `kubectl apply`·`helm upgrade --install`·`ON CONFLICT DO NOTHING` 등으로 작성되어, 재실행해도 깨지지 않도록 했습니다.
 
 ## 환경 정보
 

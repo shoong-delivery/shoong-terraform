@@ -9,3 +9,6 @@
 
 # environments/dev/terraform.tfvars
 environments/prod/terraform.tfvars
+
+# 비밀값(PAT/DB 자격증명)이 담긴 로컬 설정 파일
+scripts/env.sh
